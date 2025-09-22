@@ -12,3 +12,5 @@ uv run python deepinfra_test.py
 ```
 
 This also has `cost_estimate_analysis.py`, which does a grid search over several key parameters to profile cost and latency. This can be explored, after running, by running `viz_server.py`
+
+`cost_estimate_analysis.py`'s grid search parameters are created by the results of `parameter_analysis.py`, which combs through various semantic objects within a claim in FraudX to calculate key parameters that are common in given documents.

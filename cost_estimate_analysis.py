@@ -27,8 +27,8 @@ OUTPUT_CSV = "grid_results.csv"
 OUTPUT_PDF = "grid_report.pdf"
 
 # Grid search dimensions
-INPUT_TOKENS = [1000, 5000, 10000]
-OUTPUT_TOKENS = [256, 512, 1000]
+INPUT_TOKENS = [256, 512, 1024]
+OUTPUT_TOKENS = [256, 512, 1024]
 
 # Explicit image resolutions (fractions of 3400x4400)
 IMAGE_RESOLUTIONS = {
