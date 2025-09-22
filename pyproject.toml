@@ -6,5 +6,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "locust>=2.40.5",
+    "matplotlib>=3.10.6",
+    "pandas>=2.3.2",
     "python-dotenv>=1.1.1",
+    "tqdm>=4.67.1",
 ]
