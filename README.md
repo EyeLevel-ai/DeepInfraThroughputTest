@@ -1,16 +1,13 @@
-UV initialized. uses a local `.env` file.
+To view cost estimates, explore
 ```
-uv run locust --processes -1 -f locustfile.py --host https://api.deepinfra.com
-```
-```
-uv run locust --processes -1 -f locustfile_images.py --host https://api.deepinfra.com
+sanity_check.ipynb
 ```
 
-test if things are properly configured with:
+To do load testing, run
 ```
-uv run python deepinfra_test.py
+uv run locust -f locustfile.py --host https://api.deepinfra.com --processes -1
 ```
+press enter, and configure the number of "users". Each user sends as many requests as they can in sequence for as long as the test is running. Randomly samples from `sample_requests`.
 
-This also has `cost_estimate_analysis.py`, which does a grid search over several key parameters to profile cost and latency. This can be explored, after running, by running `viz_server.py`
-
-`cost_estimate_analysis.py`'s grid search parameters are created by the results of `parameter_analysis.py`, which combs through various semantic objects within a claim in FraudX to calculate key parameters that are common in given documents.
+---
+To serve as a baseline, one of our benchmark claims has approximately 6,381 chunks per claim

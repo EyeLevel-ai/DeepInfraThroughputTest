@@ -1,13 +1,15 @@
 from locust import HttpUser, task, between
-import os, random
+import os, json, random
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Force load variables from .env file
+# Load .env
 load_dotenv()
 API_KEY = os.getenv("DEEPINFRA_API_KEY")
 
-# Log file setup
+# Config
+REQUESTS_DIR = "sample_requests"
+FORCED_MODEL = "google/gemma-3-12b-it"
 LOG_FILE = "locust_responses.log"
 
 def log_entry(request_name: str, status_code: int, user_text: str, llm_text: str, usage: dict | None):
@@ -35,25 +37,29 @@ def log_entry(request_name: str, status_code: int, user_text: str, llm_text: str
 
         f.write("=" * 80 + "\n\n")
 
-def make_prompt(n_tokens: int) -> str:
-    return " ".join(["token"] * n_tokens) + "List and describe 20 different fruits, each with a short description."
+def load_requests(folder: str = REQUESTS_DIR):
+    requests_data = []
+    for fname in os.listdir(folder):
+        if fname.endswith(".json"):
+            path = os.path.join(folder, fname)
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                # Always override model
+                data["model"] = FORCED_MODEL
+                requests_data.append({"filename": fname, "content": data})
+    return requests_data
 
 class DeepInfraUser(HttpUser):
     wait_time = between(1, 3)
+    requests_data = load_requests()
 
     @task
-    def chat_completion(self):
-        input_tokens = random.randint(10_000, 30_000)
-        output_tokens = random.randint(100, 2000)
+    def run_random_request(self):
+        if not self.requests_data:
+            return
 
-        user_prompt = make_prompt(input_tokens)
-
-        payload = {
-            "model": "google/gemma-3-12b-it",
-            "messages": [{"role": "user", "content": user_prompt}],
-            "max_tokens": output_tokens,
-        }
-
+        req = random.choice(self.requests_data)
+        payload = req["content"]
         headers = {
             "Authorization": f"Bearer {API_KEY}",
             "Content-Type": "application/json",
@@ -63,10 +69,10 @@ class DeepInfraUser(HttpUser):
             "/v1/openai/chat/completions",
             json=payload,
             headers=headers,
-            name="chat_completion",
+            name=f"preconfigured_{req['filename']}",
             catch_response=True
         ) as response:
-            user_text = user_prompt
+            user_text = json.dumps(payload, ensure_ascii=False)[:500]
             llm_text, usage = "", None
 
             try:
@@ -77,7 +83,7 @@ class DeepInfraUser(HttpUser):
             except Exception as e:
                 llm_text = f"[Error parsing response: {e}]"
 
-            log_entry("chat_completion", response.status_code, user_text, llm_text, usage)
+            log_entry(req["filename"], response.status_code, user_text, llm_text, usage)
 
             if response.status_code != 200:
                 response.failure(f"Bad status: {response.status_code}")
