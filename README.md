@@ -11,6 +11,7 @@ uv run locust -f locustfile_deepinfra.py --host https://api.deepinfra.com --proc
 to test phoenux (kvant) run
 ```
 uv run locust -f locustfile_phoenix.py --host https://maas.ai-2.kvant.cloud --processes -1
+uv run locust -f locustfile_phoenix_4b.py --host https://summary-api-eyelevel.apps.eyelevel.kvant.cloud --processes -1
 ```
 press enter, and configure the number of "users". Each user sends as many requests as they can in sequence for as long as the test is running. Randomly samples from `sample_requests`.
 
